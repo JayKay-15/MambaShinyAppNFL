@@ -24,7 +24,7 @@ ff_stats_app <- function(seasons = c(2018:2022), scoring = "ppr", league = "flex
         select(season, gsis_id, position, full_name) %>%
         distinct()
     
-    adp <- dplyr::tbl(DBI::dbConnect(RSQLite::SQLite(), "~/srv/shiny-server/"), "adp") %>% 
+    adp <- dplyr::tbl(DBI::dbConnect(RSQLite::SQLite(), "~/srv/shiny-server/nfl_pbp_db"), "adp") %>% 
         collect() %>%
         mutate(
             name = case_when(
