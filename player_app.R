@@ -14,26 +14,29 @@ library(RSQLite)
 # Fantasy App Function ----
 ff_stats_app <- function(seasons = c(2018:2022), scoring = "ppr", league = "flex10") {
     
-    pbp_fantasy <- nflfastR::load_pbp(seasons) %>%
-        mutate(fantasy_season = if_else((season<=2020 & week<=16) |
-                                            (season>2020 & week<=17), TRUE, FALSE)) %>%
-        filter(fantasy_season == TRUE)
-    
-    roster_pos <- nflfastR::fast_scraper_roster(seasons) %>%
-        filter(position %in% c("QB","RB","WR","TE") & season == max(season)) %>%
-        select(season, gsis_id, position, full_name) %>%
-        distinct()
-    
-    adp <- dplyr::tbl(DBI::dbConnect(RSQLite::SQLite(), "~/nfl_db/nfl_pbp_db"), "adp") %>% 
-        collect() %>%
-        mutate(
-            name = case_when(
-                name == "LeVeon Bell" ~ "Le'Veon Bell",
-                name == "D.K. Metcalf" ~ "DK Metcalf",
-                TRUE ~ name
-            )
-        ) %>%
-        arrange(overall)
+  db <- DBI::dbConnect(RSQLite::SQLite(), "~/srv/shiny-server/nfl_pbp_db")
+  
+  pbp_fantasy <- RSQLite::dbGetQuery(db,
+                                     'SELECT * FROM nflfastR_pbp WHERE season >= 2020') %>%
+    mutate(fantasy_season = if_else((season<=2020 & week<=16) |
+                                      (season>2020 & week<=17), TRUE, FALSE)) %>%
+    filter(fantasy_season == TRUE)
+  
+  roster_pos <- nflfastR::fast_scraper_roster(c(2018:2022)) %>%
+    filter(position %in% c("QB","RB","WR","TE") & season == max(season)) %>%
+    select(season, gsis_id, position, full_name) %>%
+    distinct()
+  
+  adp <- dplyr::tbl(DBI::dbConnect(RSQLite::SQLite(), "~/srv/shiny-server/nfl_pbp_db"),
+                    "adp") %>% 
+    collect() %>%
+    mutate(
+      name = case_when(
+        name == "LeVeon Bell" ~ "Le'Veon Bell",
+        name == "D.K. Metcalf" ~ "DK Metcalf",
+        TRUE ~ name
+      )
+    ) %>% arrange(overall)
     
     stats_yr <- data.frame()
     stats_wk <- data.frame()
