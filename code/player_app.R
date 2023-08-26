@@ -8,6 +8,7 @@ library(ggthemes)
 library(gt)
 library(gtExtras)
 library(DT) 
+library(RSQLite)
 
 
 # Fantasy App Function ----
