@@ -10,7 +10,7 @@ library(gtExtras)
 library(DT) 
 
 # Load Fantasy App Data ----
-load(file = "ff_data_week_6.RData")
+load(file = "ff_data.RData")
 
 # Fantasy Football Shiny App ----
 stats_yearly <- stats_yearly %>% arrange(desc(season), player_display_name)
